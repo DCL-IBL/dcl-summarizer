@@ -1,4 +1,5 @@
 const pdfParse = require('pdf-parse');
+const fs = require('fs');
 const ollamaService = require('../services/ollamaService');
 
 exports.processPdf = async (req, res) => {
