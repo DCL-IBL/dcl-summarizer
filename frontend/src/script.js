@@ -9,7 +9,7 @@ $(document).ready(function() {
         $('#result').addClass('hidden');
 
         $.ajax({
-            url: 'http://backend:8000/api/process-pdf',
+            url: 'http://localhost:8000/api/process-pdf',
             type: 'POST',
             data: formData,
             processData: false,

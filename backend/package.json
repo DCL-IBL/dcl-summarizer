@@ -11,11 +11,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@langchain/community": "^0.3.32",
     "axios": "^1.7.9",
+    "chroma-node": "^1.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "fs": "^0.0.1-security",
+    "langchain": "^0.3.19",
     "multer": "^1.4.5-lts.1",
     "os": "^0.1.2",
     "pdf-parse": "^1.1.1"

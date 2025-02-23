@@ -1,6 +1,15 @@
 version: '3'
 
 services:
+  chromadb:
+    image: chromadb/chroma
+    ports:
+      - "8001:8000"
+    environment:
+      - ALLOW_RESET=true
+    volumes:
+      - chroma_data:/chroma
+
   ollama:
     image: ollama/ollama:latest
     ports:
@@ -28,7 +37,10 @@ services:
       - "3000:80"
     depends_on:
       - backend
+    volumes:
+      - ./frontend/src:/usr/share/nginx/html
 
 volumes:
   ollama_data:
   pdf_storage:
+  chroma_data:
