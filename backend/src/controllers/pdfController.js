@@ -20,6 +20,21 @@ exports.processPdf = async (req, res) => {
   }
 };
 
+exports.processTxt = async (req, res) => {
+  try {
+    const txtFile = req.file;
+    const dataBuffer = await fs.promises.readFile(txtFile.path);
+    const data = await pdfParse(dataBuffer);
+    const text = data.text;
+
+    const processedText = await ollamaService.processText(text);
+
+    res.json({ result: processedText });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 exports.handleRAGQuery = async (query) => {
   const vectorStore = new Chroma(
     new OllamaEmbeddings({ model: "deepseek-r1" }),

@@ -41,10 +41,10 @@ export async function processTextDocument(filePath) {
     // Use existing ChromaDB configuration
     const vectorStore = await Chroma.fromDocuments(
       splitDocs,
-      new OllamaEmbeddings({ model: "llama2" }),
+      new OllamaEmbeddings({ model: "deepseek-r1" }),
       { 
         collectionName: "text_docs",
-        url: process.env.CHROMA_URL 
+        url: "http://chromadb:8001" 
       }
     );
   
