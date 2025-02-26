@@ -1,6 +1,7 @@
 const pdfParse = require('pdf-parse');
 const fs = require('fs');
 const ollamaService = require('../services/ollamaService');
+const documentProcessor = require('../services/documentProcessor');
 const Chroma = require("@langchain/community/vectorstores/chroma");
 const Ollama = require("@langchain/community/llms/ollama");
 const OllamaEmbeddings = require("@langchain/community/embeddings/ollama");
@@ -23,13 +24,10 @@ exports.processPdf = async (req, res) => {
 exports.processTxt = async (req, res) => {
   try {
     const txtFile = req.file;
-    const dataBuffer = await fs.promises.readFile(txtFile.path);
-    const data = await pdfParse(dataBuffer);
-    const text = data.text;
+    
+    //const processedText = await documentProcessor.embeddingsTextDocument(txtFile.path);
 
-    const processedText = await ollamaService.processText(text);
-
-    res.json({ result: processedText });
+    res.json({ result: txtFile.path });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

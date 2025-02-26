@@ -4,7 +4,7 @@ const RecursiveCharacterTextSplitter = require("langchain/text_splitter");
 const Chroma = require("@langchain/community/vectorstores/chroma");
 const OllamaEmbeddings = require("@langchain/community/embeddings/ollama");
 
-export async function processPDF(filePath) {
+export async function embeddingsPDFDocument(filePath) {
   const loader = new PDFLoader(filePath);
   const docs = await loader.load();
   
@@ -24,12 +24,12 @@ export async function processPDF(filePath) {
   return vectorStore;
 }
 
-export async function processTextDocument(filePath) {
+export async function embeddingsTextDocument(filePath) {
     // Load text document
     const loader = new TextLoader(filePath);
     const docs = await loader.load();
   
-    // Configure text splitting (matches PDF processing)
+    // Configure text splitting
     const splitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,
       chunkOverlap: 200
@@ -38,7 +38,6 @@ export async function processTextDocument(filePath) {
     // Split and store documents
     const splitDocs = await splitter.splitDocuments(docs);
     
-    // Use existing ChromaDB configuration
     const vectorStore = await Chroma.fromDocuments(
       splitDocs,
       new OllamaEmbeddings({ model: "deepseek-r1" }),
