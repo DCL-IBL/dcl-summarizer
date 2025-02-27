@@ -2,9 +2,9 @@ const pdfParse = require('pdf-parse');
 const fs = require('fs');
 const ollamaService = require('../services/ollamaService');
 const documentProcessor = require('../services/documentProcessor');
-const Chroma = require("@langchain/community/vectorstores/chroma");
-const Ollama = require("@langchain/community/llms/ollama");
-const OllamaEmbeddings = require("@langchain/community/embeddings/ollama");
+const { Chroma } = require("@langchain/community/vectorstores/chroma");
+const { Ollama } = require("@langchain/community/llms/ollama");
+const { OllamaEmbeddings } = require("@langchain/community/embeddings/ollama");
 
 exports.processPdf = async (req, res) => {
   try {
@@ -41,7 +41,7 @@ handleRAGQuery = async (query) => {
 
   const results = await vectorStore.similaritySearch(query, 3);
   
-  const llm = new Ollama({ model: "deepseek-r1" });
+  const llm = new Ollama({ baseUrl: "http://ollama:11434", model: "deepseek-r1" });
   const prompt = `Context: ${results.map(r => r.pageContent).join("\n")}
   Question: ${query}
   Answer: `;
@@ -52,7 +52,7 @@ handleRAGQuery = async (query) => {
 exports.getRAGQueryResponse = async (req, res) => {
   try {
     const query = req.body.RAGQuery;
-    const qres = handleRAGQuery(query);
+    const qres = await handleRAGQuery(query);
     res.json({ result: qres });
   } catch (error) {
     res.status(500).json({ error: error.message });
