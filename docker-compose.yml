@@ -20,7 +20,6 @@ services:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
-      - pdf_storage:/app/uploads
     runtime: nvidia
     logging:
       options:
@@ -50,5 +49,4 @@ services:
 
 volumes:
   ollama_data:
-  pdf_storage:
   chroma_data:

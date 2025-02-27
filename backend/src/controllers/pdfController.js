@@ -25,7 +25,7 @@ exports.processTxt = async (req, res) => {
   try {
     const txtFile = req.file;
     
-    //const processedText = await documentProcessor.embeddingsTextDocument(txtFile.path);
+    const processedText = await documentProcessor.embeddingsTextDocument(txtFile.path);
 
     res.json({ result: txtFile.path });
   } catch (error) {
