@@ -1,28 +1,35 @@
-$(document).ready(function() {
-    $('#uploadForm').on('submit', function(e) {
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('queryForm');
+    const queryInput = document.getElementById('queryInput');
+    const result = document.getElementById('result');
+    const responseText = document.getElementById('responseText');
+    const loading = document.getElementById('loading');
+
+    form.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        var formData = new FormData();
-        formData.append('pdf', $('#pdfFile')[0].files[0]);
+        const query = queryInput.value.trim();
+        if (!query) return;
 
-        $('#loading').removeClass('hidden');
-        $('#result').addClass('hidden');
+        loading.classList.remove('hidden');
+        result.classList.add('hidden');
 
-        $.ajax({
-            url: 'http://localhost:8000/api/process-pdf',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                $('#loading').addClass('hidden');
-                $('#result').removeClass('hidden');
-                $('#resultText').text(response.result);
+        fetch('http://localhost:8001/api/process-rag', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
             },
-            error: function(xhr, status, error) {
-                $('#loading').addClass('hidden');
-                alert('Error processing PDF: ' + error);
-            }
+            body: JSON.stringify({ query: query })
+        })
+        .then(response => response.json())
+        .then(data => {
+            loading.classList.add('hidden');
+            result.classList.remove('hidden');
+            responseText.textContent = data.response;
+        })
+        .catch(error => {
+            loading.classList.add('hidden');
+            alert('Error processing query: ' + error.message);
         });
     });
 });
