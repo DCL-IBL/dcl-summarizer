@@ -18,17 +18,17 @@ exports.embeddingsTextDocument = async function(filePath) {
   
     // Split and store documents
     const splitDocs = await splitter.splitDocuments(docs);
-    
-    const embeddings = new OllamaEmbeddings({ baseURL: OLLAMA_URL, model: "deepseek-r1" });
-   
-    const vectorStore = await Chroma.fromDocuments(
-      splitDocs,
-      new OllamaEmbeddings({ baseURL: OLLAMA_URL, model: "deepseek-r1" }),
+        
+    const embeddings = new OllamaEmbeddings({ baseUrl: OLLAMA_URL, model: "deepseek-r1" });
+    console.dir(embeddings)
+    const vectorStore = new Chroma(
+      embeddings,
       { 
         collectionName: "text_docs",
-        url: "http://localhost:8001" 
+        url: "http://chromadb:8000" 
       }
     );
+    vectorStore.addDocuments(splitDocs);
     console.log("vectorStore created");
   
     return vectorStore;
