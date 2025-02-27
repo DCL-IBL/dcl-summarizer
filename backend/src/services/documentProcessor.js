@@ -20,7 +20,7 @@ exports.embeddingsTextDocument = async function(filePath) {
     const splitDocs = await splitter.splitDocuments(docs);
         
     const embeddings = new OllamaEmbeddings({ baseUrl: OLLAMA_URL, model: "deepseek-r1" });
-    console.dir(embeddings)
+    
     const vectorStore = new Chroma(
       embeddings,
       { 
@@ -28,8 +28,7 @@ exports.embeddingsTextDocument = async function(filePath) {
         url: "http://chromadb:8000" 
       }
     );
-    vectorStore.addDocuments(splitDocs);
-    console.log("vectorStore created");
+    await vectorStore.addDocuments(splitDocs);
   
     return vectorStore;
   }

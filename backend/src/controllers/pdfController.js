@@ -24,7 +24,7 @@ exports.processPdf = async (req, res) => {
 exports.processTxt = async (req, res) => {
   try {
     const txtFile = req.file;
-    console.log("Start embedding text file "+txtFile);    
+        
     const processedText = await documentProcessor.embeddingsTextDocument(txtFile.path);
 
     res.json({ result: txtFile.path });
@@ -33,10 +33,10 @@ exports.processTxt = async (req, res) => {
   }
 };
 
-exports.handleRAGQuery = async (query) => {
+handleRAGQuery = async (query) => {
   const vectorStore = new Chroma(
-    new OllamaEmbeddings({ model: "deepseek-r1" }),
-    { collectionName: "pdf_docs", url: "http://chromadb:8001" }
+    new OllamaEmbeddings({ baseUrl: "http://ollama:11434", model: "deepseek-r1" }),
+    { collectionName: "text_docs", url: "http://chromadb:8000" }
   );
 
   const results = await vectorStore.similaritySearch(query, 3);
@@ -47,4 +47,14 @@ exports.handleRAGQuery = async (query) => {
   Answer: `;
 
   return llm.invoke(prompt);
-}
+};
+
+exports.getRAGQueryResponse = async (req, res) => {
+  try {
+    const query = req.body.RAGQuery;
+    const qres = handleRAGQuery(query);
+    res.json({ result: qres });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
