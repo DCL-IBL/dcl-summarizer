@@ -24,7 +24,7 @@ exports.processPdf = async (req, res) => {
 exports.processTxt = async (req, res) => {
   try {
     const txtFile = req.file;
-    
+    console.log("Start embedding text file "+txtFile);    
     const processedText = await documentProcessor.embeddingsTextDocument(txtFile.path);
 
     res.json({ result: txtFile.path });
