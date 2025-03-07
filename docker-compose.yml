@@ -13,6 +13,9 @@ services:
       - chroma_data:/chroma
     security_opt:
       - seccomp:unconfined
+    logging:
+      options:
+        max-size: "10m"
 
   ollama:
     image: ollama/ollama:latest
@@ -38,6 +41,12 @@ services:
     environment:
       - NODE_ENV=development
       - OLLAMA_URL=http://ollama:11434
+      - MODEL_EMB=mxbai-embed-large
+      - MODEL_LLM=llama3
+      - CHROMA_URL=http://chromadb:8000
+    logging:
+      options:
+        max-size: "10m"
 
   frontend:
     build: ./frontend
