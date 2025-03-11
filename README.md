@@ -24,9 +24,9 @@
 Изберете моделите които ще използвате с променливите на средата в docker-compose.yml
 - MODEL_EMB=mxbai-embed-large
 - MODEL_LLM=llama3
-Изтеглете тези модели чрез Ollama API
-- curl http://localhost:11434/api/pull -d'{"model":"llama3"}'
-- curl http://localhost:11434/api/pull -d'{"model":"mxbai-embed-large"}'
+- Изтеглете тези модели чрез Ollama API
+   - curl http://localhost:11434/api/pull -d'{"model":"llama3"}'
+   - curl http://localhost:11434/api/pull -d'{"model":"mxbai-embed-large"}'
 
 ### Стартиране
 - sudo docker-compose build
