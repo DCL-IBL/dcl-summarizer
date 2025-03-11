@@ -29,10 +29,10 @@
 - curl http://localhost:11434/api/pull -d'{"model":"mxbai-embed-large"}'
 
 ### Стартиране
-sudo docker-compose build
-sudo docker-compose up -d
+- sudo docker-compose build
+- sudo docker-compose up -d
 
 ## Употреба
 
 ### Основни Команди
-- Качване на документи:
+- Качване на документи: curl -X POST -F "txtFile=@/path/to/file.txt" http://localhost:8000/api/process-txt
