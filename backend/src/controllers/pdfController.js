@@ -6,6 +6,11 @@ const { Chroma } = require("@langchain/community/vectorstores/chroma");
 const { Ollama } = require("@langchain/community/llms/ollama");
 const { OllamaEmbeddings } = require("@langchain/community/embeddings/ollama");
 
+const OLLAMA_URL = process.env.OLLAMA_URL;
+const MODEL_EMB = process.env.MODEL_EMB;
+const CHROMA_URL = process.env.CHROMA_URL;
+const MODEL_LLM = process.env.MODEL_LLM;
+
 exports.processPdf = async (req, res) => {
   try {
     const pdfFile = req.file;
@@ -35,15 +40,40 @@ exports.processTxt = async (req, res) => {
 
 handleRAGQuery = async (query) => {
   const vectorStore = new Chroma(
-    new OllamaEmbeddings({ baseUrl: "http://ollama:11434", model: "deepseek-r1" }),
-    { collectionName: "text_docs", url: "http://chromadb:8000" }
+    new OllamaEmbeddings({ baseUrl: OLLAMA_URL, model: MODEL_EMB }),
+    { collectionName: "text_docs", url: CHROMA_URL }
   );
 
   const results = await vectorStore.similaritySearch(query, 3);
   
-  const llm = new Ollama({ baseUrl: "http://ollama:11434", model: "deepseek-r1" });
-    const prompt = `Резюмирай следния текст в 3 изречения и предостави информацията в JSON формат, като включиш 5 ключови думи, 3 категории и 3 въпроса, които могат да бъдат зададени, като използваш следният JSON шаблон: {"ключови_думи": ["Исак Нютон", "класическа механика", "закон за всемирното привличане", "математически анализ", "рефлекторен телескоп"],"категории": ["Научна революция", "Физика", "Математика"],"въпроси": ["Кои са трите закона за движение, формулирани от Исак Нютон?","Как Нютон допринася за развитието на оптиката и теорията за цветовете?","Защо религиозните възгледи на Нютон се смятат за неортодоксални?"],"резюме": ["Исак Нютон е английски учен с фундаментален принос в физиката, математиката и астрономията, считан за ключова фигура в Научната революция.","Той формулира законите за движение и гравитацията, поставяйки основите на класическата механика, разработва математически анализ и изследва природата на светлината, създавайки първия рефлекторен телескоп.","Освен научната дейност, Нютон изследва религиозни и окултни теми, отхвърляйки догми като Светата Троица, и участва в интерпретации на библейски текстове."]}. Контекст: ${results.map(r => r.pageContent).join("\n")}. Текст за резюмиране: ${query}`;
+  const llm = new Ollama({ baseUrl: OLLAMA_URL, model: MODEL_LLM });
+    const prompt = `<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+	  You are an advanced language model capable of summarizing text and generating structured outputs. Your task is to:
+	  1. Summarize the provided text using context retrieved from external sources (RAG context).
+	  2. Output the summary strictly in JSON format.
+	  3. Answer in Bulgarian language.
+	  4. The JSON should include:
+	  - "keywords": A list of 5 key terms that capture the essence of the text.
+	  - "questions": A list of 3 questions that should be addressed based on the text.
+	  - "categories": A classification of the text into 3 categories.
+	  - "summary": A short summary of the provided text
 
+	  Ensure your response is valid JSON with no additional text outside the JSON object.
+
+	  <|eot_id|><|start_header_id|>user<|end_header_id|>
+	  Here is the input text: "${query}"
+
+    RAG Context: "${results.map(r => r.pageContent).join("\n")}"
+
+    Expected Output Format:
+    {
+	"keywords": ["ключова дума 1", "ключова дума 2", "ключова дума 3", "ключова дума 4", "ключова дума 5"],
+	"questions": ["Въпрос 1", "Въпрос 2", "Въпрос 3"],
+	"categories": ["Категория 1", "Категория 2", "Категория 3"],
+	"summary": "резюме на текста"
+    }
+	<|eot_id|><|start_header_id|>assistant<|end_header_id|>`;
+    console.log(prompt);
   return llm.invoke(prompt);
 };
 
