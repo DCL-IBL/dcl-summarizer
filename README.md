@@ -36,3 +36,8 @@
 
 ### Основни Команди
 - Качване на документи: curl -X POST -F "txtFile=@/path/to/file.txt" http://localhost:8000/api/process-txt
+- Тестови заявки: curl -X POST -H "Content-Type: application/json" -d '{"RAGQuery":"Кой е фараон на Египед познаваш?"}' http://localhost:8000/api/process-rag
+
+### Потребителски Интерфейс
+1. Отворете `http://localhost:3000`
+2. Въведете заявка на български
