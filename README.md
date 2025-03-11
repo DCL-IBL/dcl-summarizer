@@ -25,18 +25,18 @@
 - MODEL_EMB=mxbai-embed-large
 - MODEL_LLM=llama3
 - Изтеглете тези модели чрез Ollama API
-   - curl http://localhost:11434/api/pull -d'{"model":"llama3"}'
-   - curl http://localhost:11434/api/pull -d'{"model":"mxbai-embed-large"}'
+   - `curl http://localhost:11434/api/pull -d'{"model":"llama3"}'`
+   - `curl http://localhost:11434/api/pull -d'{"model":"mxbai-embed-large"}'`
 
 ### Стартиране
-- sudo docker-compose build
-- sudo docker-compose up -d
+- `sudo docker-compose build`
+- `sudo docker-compose up -d`
 
 ## Употреба
 
 ### Основни Команди
-- Качване на документи: curl -X POST -F "txtFile=@/path/to/file.txt" http://localhost:8000/api/process-txt
-- Тестови заявки: curl -X POST -H "Content-Type: application/json" -d '{"RAGQuery":"Кой е фараон на Египед познаваш?"}' http://localhost:8000/api/process-rag
+- Качване на документи: `curl -X POST -F "txtFile=@/path/to/file.txt" http://localhost:8000/api/process-txt`
+- Тестови заявки: `curl -X POST -H "Content-Type: application/json" -d '{"RAGQuery":"Кой е фараон на Египед познаваш?"}' http://localhost:8000/api/process-rag`
 
 ### Потребителски Интерфейс
 1. Отворете `http://localhost:3000`
