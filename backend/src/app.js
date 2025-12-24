@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const pdfRoutes = require('./routes/pdfRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -18,6 +19,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/api', pdfRoutes);
+app.use('/auth',authRoutes);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
