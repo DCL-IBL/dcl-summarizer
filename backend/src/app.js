@@ -19,6 +19,8 @@ app.use((req, res, next) => {
   next();
 });*/
 
+app.set('trust proxy', 1);  // Trust first proxy (Nginx)
+
 app.use('/api', pdfRoutes);
 app.use('/auth',authRoutes);
 
