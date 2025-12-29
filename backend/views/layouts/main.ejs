@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title><%= title || 'DCL Summarizer Dashboard' %></title>
+  <link rel="stylesheet" href="/css/dashboard.css" />
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  <main class="dashboard">
+    <%- include('../partials/flash') %>
+    <%- body %>
+  </main>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

@@ -44,8 +44,7 @@ router.post('/login', async (req, res) => {
 });
 
 function authJwt(req, res, next) {
-  const header = req.headers['authorization'] || '';
-  const [, token] = header.split(' ');
+  const token = req.query.token;
   if (!token) return res.sendStatus(401);
 
   try {
@@ -61,4 +60,17 @@ router.get('/profile', authJwt, (req, res) => {
   res.json({ userId: req.userId });
 });
 
-module.exports = router;
+function authJwtAsParam(req, res, next) {
+  const token = req.params.token;
+  if (!token) return res.sendStatus(401);
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = payload.sub;
+    next();
+  } catch {
+    res.sendStatus(401);
+  }
+}
+
+module.exports = {router,authJwt,authJwtAsParam};

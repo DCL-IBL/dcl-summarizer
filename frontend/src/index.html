@@ -1,24 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAG Query System</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link rel="stylesheet" href="login.css">
 </head>
 <body>
-    <div class="container">
-        <h1>RAG Query System</h1>
-        <form id="queryForm">
-            <textarea id="RAGQuery" placeholder="Enter your query here" required></textarea>
-            <button type="submit">Submit Query</button>
-        </form>
-        <div id="result" class="hidden">
-            <h2>Response:</h2>
-            <pre id="responseText"></pre>
-        </div>
-        <div id="loading" class="hidden">Processing...</div>
-    </div>
-    <script src="script.js"></script>
+  <main class="login-container">
+    <form id="loginForm" class="login-form">
+      <h1>Sign In</h1>
+      
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required 
+               autocomplete="email" aria-describedby="email-error">
+        <span id="email-error" class="error" aria-live="polite"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required 
+               autocomplete="current-password">
+        <span id="password-error" class="error" aria-live="polite"></span>
+      </div>
+
+      <button type="submit" id="loginBtn" disabled>Sign In</button>
+      
+      <div id="login-error" class="error-message" role="alert" aria-live="assertive"></div>
+    </form>
+  </main>
+
+  <script src="login.js"></script>
 </body>
 </html>

@@ -47,13 +47,9 @@ class LoginHandler {
       // Handle JWT response
       if (data.accessToken) {
         localStorage.setItem('accessToken', data.accessToken);
-        window.location.href = '/dashboard';
+        window.location.href = `/dashboard/${data.accessToken}`;
         return;
       }
-
-      // Session-based: just redirect
-      window.location.href = '/dashboard';
-
     } catch (error) {
       this.showError(error.message);
     } finally {
