@@ -1,0 +1,11 @@
+.page-section {
+    background-color: skyblue;
+}
+
+.block-visible {
+    display: block;
+}
+
+.block-hidden {
+    display: none;
+}

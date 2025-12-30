@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Query System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>RAG Query System</h1>
+        <form id="queryForm">
+            <textarea id="RAGQuery" placeholder="Enter your query here" required></textarea>
+            <button type="submit">Submit Query</button>
+        </form>
+        <div id="result" class="hidden">
+            <h2>Response:</h2>
+            <pre id="responseText"></pre>
+        </div>
+        <div id="loading" class="hidden">Processing...</div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
