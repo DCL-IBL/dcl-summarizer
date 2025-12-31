@@ -10,23 +10,23 @@
   <header>
     <h1>Dashboard</h1>
     <nav>
-      <button data-target="home">Home</button>
+      <button data-target="query">Home</button>
       <button data-target="history">History</button>
       <button data-target="files">Documents</button>
       <button data-target="profile">Profile</button>
     </nav>
   </header>
-  <main data-activeSection="home">
+  <main data-activesection="query">
 
-    <section class="page-section block-visible">
+    <section id="query" class="page-section block-visible">
       <h2>New Query</h2>
     </section>
     
-    <section class="page-section block-hidden">
+    <section id="history" class="page-section block-hidden">
       <h2>Past Queries</h2>
     </section>
     
-    <section class="page-section block-hidden">
+    <section id="files" class="page-section block-hidden">
       <h2>Documents</h2>
       <section>
         <h3>Public</h3>
@@ -39,12 +39,8 @@
       </section>
     </section>
     
-    <section class="page-section block-hidden">
+    <section id="profile" class="page-section block-hidden">
       <h2>Profile</h2>
-    </section>
-    
-    <section class="page-section block-hidden">
-      <h2>Past Queries</h2>
     </section>
   
   </main>
