@@ -5,6 +5,7 @@ const documentProcessor = require('../services/documentProcessor');
 const { Chroma } = require("@langchain/community/vectorstores/chroma");
 const { Ollama } = require("@langchain/community/llms/ollama");
 const { OllamaEmbeddings } = require("@langchain/community/embeddings/ollama");
+const { STATUS_CODES } = require('http');
 
 const OLLAMA_URL = process.env.OLLAMA_URL;
 const MODEL_EMB = process.env.MODEL_EMB;
@@ -28,11 +29,11 @@ exports.processPdf = async (req, res) => {
 
 exports.processTxt = async (req, res) => {
   try {
-    const txtFile = req.file;
-        
-    const processedText = await documentProcessor.embeddingsTextDocument(txtFile.path);
+    const files = req.files;
 
-    res.json({ result: txtFile.path });
+   const process_result = await documentProcessor.embeddingsTextDocument(files,req.userId);
+
+    res.json({result: "Uploaded"});
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

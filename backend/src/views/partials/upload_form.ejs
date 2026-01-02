@@ -1,0 +1,23 @@
+<form id="uploadForm" class="upload-form">
+    <div class="form-group">
+        <label for="file_select">Select files</label>
+        <input type="file" 
+               id="file_select"
+               multiple 
+               accept=".pdf,.txt"
+               required />
+        <small>PDF, TXT</small>
+    </div>
+        
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+        <span class="progress-text" id="progressText">Ready</span>
+    </div>
+    
+    <button type="submit" id="uploadBtn">
+      Upload files
+    </button>
+    
+    <div id="uploadResult" class="result-message hidden"></div>
+</form>

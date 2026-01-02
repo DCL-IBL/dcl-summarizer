@@ -3,15 +3,23 @@ const { RecursiveCharacterTextSplitter } = require("langchain/text_splitter");
 const { Chroma } = require("@langchain/community/vectorstores/chroma");
 const { OllamaEmbeddings } = require("@langchain/community/embeddings/ollama");
 const { ChromaClient } = require("chromadb");
+const { Document } = require("@langchain/core/documents");
+
 
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
 const MODEL_EMB = process.env.MODEL_EMB
 const CHROMA_URL = process.env.CHROMA_URL
 
-exports.embeddingsTextDocument = async function(filePath) {
+exports.embeddingsTextDocument = async function(files,user_id) {
     // Load text document
-    const loader = new TextLoader(filePath);
-    const docs = await loader.load();
+    files.forEach(file => {
+      const loader = new TextLoader(file.path);
+    });
+
+    const document1 = new Document (
+      pageContent=await loader.load(),
+      metadata=metadata
+    );
   
     // Configure text splitting
     const splitter = new RecursiveCharacterTextSplitter({
@@ -20,7 +28,7 @@ exports.embeddingsTextDocument = async function(filePath) {
     });
   
     // Split and store documents
-    const splitDocs = await splitter.splitDocuments(docs);
+    const splitDocs = await splitter.splitDocuments(document1);
         
     const embeddings = new OllamaEmbeddings({ baseUrl: OLLAMA_URL, model: MODEL_EMB });
     
