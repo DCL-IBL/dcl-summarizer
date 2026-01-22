@@ -10,4 +10,6 @@ router.post('/process-txt', upload.array('files',12), pdfController.processTxt);
 router.post('/process-rag', pdfController.getRAGQueryResponse);
 router.post('/clear-db', pdfController.clearDB);
 
+router.post('/documents/delete/:docId', pdfController.deleteDoc);
+
 module.exports = router;

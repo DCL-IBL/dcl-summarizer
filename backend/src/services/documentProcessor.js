@@ -4,32 +4,29 @@ const { Chroma } = require("@langchain/community/vectorstores/chroma");
 const { OllamaEmbeddings } = require("@langchain/community/embeddings/ollama");
 const { ChromaClient } = require("chromadb");
 const { Document } = require("@langchain/core/documents");
+const db = require('../db');
 
-
-const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
+//const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
+const OLLAMA_URL = 'http://host.docker.internal:11434';
 const MODEL_EMB = process.env.MODEL_EMB
 const CHROMA_URL = process.env.CHROMA_URL
 
-exports.embeddingsTextDocument = async function(files,user_id) {
-    // Load text document
-    files.forEach(file => {
-      const loader = new TextLoader(file.path);
-    });
+exports.receiveDocument = async function(files,user_id) {
+  for (var k = 0; k < files.length; k++) {
+    title = files[k].originalname;
+    mimetype = files[k].mimetype;
+    filename = files[k].filename;
+    size = files[k].size;
+    row = await db.query('INSERT INTO documents (user_id,title,filename,mime_type,size_bytes) VALUES ($1,$2,$3,$4,$5)', [user_id,title,filename,mimetype,size]);
+  }
+}
 
-    const document1 = new Document (
-      pageContent=await loader.load(),
-      metadata=metadata
-    );
-  
-    // Configure text splitting
+exports.embeddingsTextDocument = async function(files,user_id) {
     const splitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,
       chunkOverlap: 200
     });
-  
-    // Split and store documents
-    const splitDocs = await splitter.splitDocuments(document1);
-        
+
     const embeddings = new OllamaEmbeddings({ baseUrl: OLLAMA_URL, model: MODEL_EMB });
     
     const vectorStore = new Chroma(
@@ -39,7 +36,22 @@ exports.embeddingsTextDocument = async function(files,user_id) {
         url: CHROMA_URL 
       }
     );
-    await vectorStore.addDocuments(splitDocs);
+
+    // Load text document
+    files.forEach(async (file) => {
+      const loader = new TextLoader(file.path);
+      var doc1 = await loader.load();
+      doc1[0].metadata.user_id = user_id;
+      console.log(doc1);
+
+      const ids = await vectorStore.addDocuments(doc1);
+      console.log(ids);
+    });
+  
+    // Split and store documents
+    // const splitDocs = await splitter.splitDocuments(document1);
+    
+    //await vectorStore.addDocuments(splitDocs);
   
     return vectorStore;
   }

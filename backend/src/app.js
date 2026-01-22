@@ -4,6 +4,7 @@ const cors = require('cors');
 const apiRoutes = require('./routes/apiRoutes');
 const authRoutes = require('./routes/authRoutes');
 const expressLayouts = require('express-ejs-layouts');
+const document_model = require('./models/document_model.js');
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -27,12 +28,15 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
 app.set('layout','layouts/main.ejs');
 
-app.get('/dashboard/:token', authRoutes.authJwtAsParam, (req, res, next) => {
+app.get('/dashboard/:token', authRoutes.authJwtAsParam, async (req, res, next) => {
   const pastQueries = {};//await ragRepo.getUserQueries(req.session.userId, { limit: 20 });
   const profile = {};//await profileRepo.getUserProfile(req.session.userId);
+  const userDocs = await document_model.getUserDocs(req.userId);
+  //console.log(userDocs);
 
   res.render('pages/dashboard',{
-    title:"DCL Summarizer Dashboard"
+    title:"DCL Summarizer Dashboard",
+    userDocs,
     //pastQueries,
     //profile
   });

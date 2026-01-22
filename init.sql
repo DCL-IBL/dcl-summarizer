@@ -19,11 +19,11 @@ CREATE TABLE queries (
 
 CREATE TABLE documents (
   id             BIGSERIAL PRIMARY KEY,
-  chroma_id      TEXT NOT NULL UNIQUE,  -- ChromaDB document ID
+  chroma_id      UUID DEFAULT gen_random_uuid(),
   user_id        INTEGER REFERENCES users(id) ON DELETE CASCADE,  -- NULL = public
-  title          TEXT NOT NULL,
+  title          TEXT NOT NULL UNIQUE ON CONFLICT DO NOTHING,
   filename       TEXT,
-  collection     TEXT NOT NULL,          -- ChromaDB collection name
+  collection     TEXT,          -- ChromaDB collection name
   mime_type      TEXT,                   
   size_bytes     BIGINT,                 
   chunk_count    INTEGER DEFAULT 0,      -- number of vector chunks created

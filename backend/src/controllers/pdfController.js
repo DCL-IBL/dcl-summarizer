@@ -6,11 +6,32 @@ const { Chroma } = require("@langchain/community/vectorstores/chroma");
 const { Ollama } = require("@langchain/community/llms/ollama");
 const { OllamaEmbeddings } = require("@langchain/community/embeddings/ollama");
 const { STATUS_CODES } = require('http');
+const db = require('../db');
 
 const OLLAMA_URL = process.env.OLLAMA_URL;
 const MODEL_EMB = process.env.MODEL_EMB;
 const CHROMA_URL = process.env.CHROMA_URL;
 const MODEL_LLM = process.env.MODEL_LLM;
+
+exports.deleteDoc = async (req,res) => {
+  try {
+    const docsResult = await db.query(`
+          SELECT *
+          FROM documents 
+          WHERE (id = $1) 
+        `, [req.params.docId]);
+
+    const rmResult = await fs.promises.rm(`uploads/${docsResult.rows[0].filename}`);
+
+    const deleteResult = await db.query(`
+          DELETE FROM documents 
+          WHERE id = $1
+        `, [req.params.docId]);
+    res.status(200).json({});
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
 
 exports.processPdf = async (req, res) => {
   try {
@@ -31,7 +52,8 @@ exports.processTxt = async (req, res) => {
   try {
     const files = req.files;
 
-   const process_result = await documentProcessor.embeddingsTextDocument(files,req.userId);
+    const upload_result = await documentProcessor.receiveDocument(files,req.userId);
+    //const process_result = await documentProcessor.embeddingsTextDocument(files,req.userId);
 
     res.json({result: "Uploaded"});
   } catch (error) {

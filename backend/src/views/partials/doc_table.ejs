@@ -1,0 +1,48 @@
+<table id="document_table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Mime Type</th>
+            <th>Size</th>
+            <th>Chunks</th>
+            <th>Metadata</th>
+            <th>Status</th>
+            <th>Actions</th>
+            <th>Created</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% userDocs.forEach(doc => {%>
+            <tr data-doc-id="<%= doc.id %>">
+                <td><%= doc.title %></td>
+                <td><%= doc.mime_type %></td>
+                <td><%= doc.size_bytes %></td>
+                <td><%= doc.chunk_count %></td>
+                <td><%= doc.metadata %></td>
+                <td><%= doc.status %></td>
+                <td>
+                    <button data-action="edit">✏️</button>
+                    <button data-action="delete">🗑️</button>
+                </td>
+                <td><%= doc.created_at.toISOString() %></td>
+            </tr>    
+        <%})%>
+    </tbody>
+    <script>
+        token = localStorage.getItem('accessToken');
+
+        document_table_dom = document.getElementById("document_table");
+        document_table_dom.addEventListener('click', async (e) => {
+            if (e.target.matches('[data-action="delete"]')) {
+                docId = e.target.closest('tr').dataset.docId;
+                const response = await fetch(`${token}/api/documents/delete/${docId}`, {method: 'POST'});
+                
+                if (!response.ok) {
+                    throw new Error('Delete document failed');
+                }
+
+                window.location.reload();
+            }
+        });
+    </script>
+</table>
