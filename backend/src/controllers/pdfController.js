@@ -7,6 +7,7 @@ const { Ollama } = require("@langchain/community/llms/ollama");
 const { OllamaEmbeddings } = require("@langchain/community/embeddings/ollama");
 const { STATUS_CODES } = require('http');
 const db = require('../db');
+const { documentQueue } = require('../queues/documentEmb');
 
 const OLLAMA_URL = process.env.OLLAMA_URL;
 const MODEL_EMB = process.env.MODEL_EMB;
@@ -51,12 +52,27 @@ exports.processPdf = async (req, res) => {
 exports.processTxt = async (req, res) => {
   try {
     const files = req.files;
-
-    const upload_result = await documentProcessor.receiveDocument(files,req.userId);
-    //const process_result = await documentProcessor.embeddingsTextDocument(files,req.userId);
+    const user_id = req.userId;
+    for (var k = 0; k < files.length; k++) {
+      title = files[k].originalname;
+      mimetype = files[k].mimetype;
+      filename = files[k].filename;
+      size = files[k].size;
+      
+      db_result = await db.query('INSERT INTO documents (user_id,title,filename,mime_type,size_bytes) VALUES ($1,$2,$3,$4,$5) RETURNING chroma_id', [user_id,title,filename,mimetype,size]);
+      if (db_result.rows.length > 0) {
+        cid = db_result.rows[0].chroma_id;
+        await documentQueue.add('ingest', {
+          chroma_id: cid,
+          mime: mimetype,
+          storedFilename: filename,
+        });
+      }
+    }
 
     res.json({result: "Uploaded"});
   } catch (error) {
+    console.log(error.message);
     res.status(500).json({ error: error.message });
   }
 };

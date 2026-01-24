@@ -11,17 +11,7 @@ const OLLAMA_URL = 'http://host.docker.internal:11434';
 const MODEL_EMB = process.env.MODEL_EMB
 const CHROMA_URL = process.env.CHROMA_URL
 
-exports.receiveDocument = async function(files,user_id) {
-  for (var k = 0; k < files.length; k++) {
-    title = files[k].originalname;
-    mimetype = files[k].mimetype;
-    filename = files[k].filename;
-    size = files[k].size;
-    row = await db.query('INSERT INTO documents (user_id,title,filename,mime_type,size_bytes) VALUES ($1,$2,$3,$4,$5)', [user_id,title,filename,mimetype,size]);
-  }
-}
-
-exports.embeddingsTextDocument = async function(files,user_id) {
+exports.embeddingsTextDocument = async function(file,cid) {
     const splitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,
       chunkOverlap: 200
@@ -38,15 +28,11 @@ exports.embeddingsTextDocument = async function(files,user_id) {
     );
 
     // Load text document
-    files.forEach(async (file) => {
-      const loader = new TextLoader(file.path);
-      var doc1 = await loader.load();
-      doc1[0].metadata.user_id = user_id;
-      console.log(doc1);
+    const loader = new TextLoader(`uploads/${file}`);
+    var doc1 = await loader.load();
 
-      const ids = await vectorStore.addDocuments(doc1);
-      console.log(ids);
-    });
+    const ids = await vectorStore.addDocuments(doc1,{ cid });
+    console.log(ids);
   
     // Split and store documents
     // const splitDocs = await splitter.splitDocuments(document1);
