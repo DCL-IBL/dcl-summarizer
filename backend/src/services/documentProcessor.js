@@ -12,6 +12,7 @@ const MODEL_EMB = process.env.MODEL_EMB
 const CHROMA_URL = process.env.CHROMA_URL
 
 exports.embeddingsTextDocument = async function(file,cid) {
+  try {
     const splitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,
       chunkOverlap: 200
@@ -32,15 +33,21 @@ exports.embeddingsTextDocument = async function(file,cid) {
     var doc1 = await loader.load();
 
     const ids = await vectorStore.addDocuments(doc1,{ cid });
-    console.log(ids);
+    console.log(`Added document to text_docs with id ${cid}`);
+
+    const updateResult = await db.query(`
+            UPDATE documents
+            SET status = 'ready', chunk_count = 0, updated_at = now() WHERE chroma_id = '${cid}'
+            `);
   
     // Split and store documents
     // const splitDocs = await splitter.splitDocuments(document1);
     
     //await vectorStore.addDocuments(splitDocs);
-  
-    return vectorStore;
+  } catch (err) {
+    console.log(err.message);
   }
+}
 
 exports.deleteTextEmbeddings = async function(collection_name) {
     const client = new ChromaClient({ path: CHROMA_URL });

@@ -10,7 +10,7 @@ module.exports = { documentQueue };
 const worker = new Worker('documents', async job => {
     const { chroma_id, mime, storedFilename } = job.data;
     if (mime === 'text/plain') {
-        embeddingsTextDocument([storedFilename],[chroma_id]);
+        await embeddingsTextDocument([storedFilename],[chroma_id]);
     }
 }, {
     concurrency: 3,

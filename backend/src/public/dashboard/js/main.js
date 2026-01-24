@@ -12,8 +12,13 @@ class DashboardController {
         this.uploadResult = document.getElementById('uploadResult');
 
         this.token = localStorage.getItem('accessToken');
-
+        
         this.init();
+
+        this.last_page = localStorage.getItem('last_page');
+        if (this.last_page != null) {
+            this.switchSection(this.last_page);
+        }
     }
 
     init() {
@@ -80,6 +85,7 @@ class DashboardController {
         this.page.dataset.activesection = target;
         document.getElementById(old_target).classList.replace("block-visible","block-hidden");
         document.getElementById(target).classList.replace("block-hidden","block-visible");
+        localStorage.setItem('last_page',target);
     }
 }
 
