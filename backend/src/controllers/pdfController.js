@@ -9,7 +9,8 @@ const { STATUS_CODES } = require('http');
 const db = require('../db');
 const { documentQueue } = require('../queues/documentEmb');
 
-const OLLAMA_URL = process.env.OLLAMA_URL;
+//const OLLAMA_URL = process.env.OLLAMA_URL;
+const OLLAMA_URL = 'http://host.docker.internal:11434';
 const MODEL_EMB = process.env.MODEL_EMB;
 const CHROMA_URL = process.env.CHROMA_URL;
 const MODEL_LLM = process.env.MODEL_LLM;

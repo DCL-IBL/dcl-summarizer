@@ -11,6 +11,12 @@ class DashboardController {
         this.uploadProgressBar = document.getElementById('progressBar');
         this.uploadResult = document.getElementById('uploadResult');
 
+        this.aug_form = document.getElementById('queryForm');
+        this.aug_queryInput = document.getElementById('RAGQuery');
+        this.aug_result = document.getElementById('result');
+        this.aug_responseText = document.getElementById('responseText');
+        this.aug_loading = document.getElementById('loading');
+
         this.token = localStorage.getItem('accessToken');
         
         this.init();
@@ -39,7 +45,12 @@ class DashboardController {
             if (files.length > 0) {
                 this.uploadProgressText.textContent = `${files.length} file(s) selected`;
             }
-        });    
+        });
+
+        this.aug_form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.run_query();
+        });
     }
 
     getFiles() {
@@ -78,6 +89,32 @@ class DashboardController {
         } finally {
             //this.setLoading(false);
         }
+    }
+
+    async run_query() {
+        const query = this.aug_queryInput.value.trim();
+        if (!query) return;
+
+        this.aug_loading.classList.replace("block-hidden","block-visible");
+        this.aug_result.classList.replace("block-visible","block-hidden");
+
+        fetch(`${this.token}/api/process-rag`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ "RAGQuery": query })
+        })
+        .then(response => response.json())
+        .then(data => {
+            this.aug_loading.classList.replace("block-visible","block-hidden");
+            this.aug_result.classList.replace("block-hidden","block-visible");
+            responseText.textContent = data.result;
+        })
+        .catch(error => {
+            this.aug_loading.classList.replace("block-visible","block-hidden");
+            alert('Error processing query: ' + error.message);
+        });
     }
 
     switchSection(target) {
