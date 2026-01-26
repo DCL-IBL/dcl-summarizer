@@ -8,6 +8,7 @@ const { OllamaEmbeddings } = require("@langchain/community/embeddings/ollama");
 const { STATUS_CODES } = require('http');
 const db = require('../db');
 const { documentQueue } = require('../queues/documentEmb');
+const { queriesQueue } = require('../queues/queryQueue');
 
 //const OLLAMA_URL = process.env.OLLAMA_URL;
 const OLLAMA_URL = 'http://host.docker.internal:11434';
@@ -60,13 +61,15 @@ exports.processTxt = async (req, res) => {
       filename = files[k].filename;
       size = files[k].size;
       
-      db_result = await db.query('INSERT INTO documents (user_id,title,filename,mime_type,size_bytes) VALUES ($1,$2,$3,$4,$5) RETURNING chroma_id', [user_id,title,filename,mimetype,size]);
+      db_result = await db.query('INSERT INTO documents (user_id,title,filename,mime_type,size_bytes) VALUES ($1,$2,$3,$4,$5) RETURNING chroma_id,user_id', [user_id,title,filename,mimetype,size]);
       if (db_result.rows.length > 0) {
         cid = db_result.rows[0].chroma_id;
+        uid = db_result.rows[0].user_id;
         await documentQueue.add('ingest', {
           chroma_id: cid,
           mime: mimetype,
           storedFilename: filename,
+          user_id: uid
         });
       }
     }
@@ -78,50 +81,25 @@ exports.processTxt = async (req, res) => {
   }
 };
 
-handleRAGQuery = async (query) => {
-  const vectorStore = new Chroma(
-    new OllamaEmbeddings({ baseUrl: OLLAMA_URL, model: MODEL_EMB }),
-    { collectionName: "text_docs", url: CHROMA_URL }
-  );
-
-  const results = await vectorStore.similaritySearch(query, 3);
-  
-  const llm = new Ollama({ baseUrl: OLLAMA_URL, model: MODEL_LLM });
-    const prompt = `<|begin_of_text|><|start_header_id|>system<|end_header_id|>
-	  You are an advanced language model capable of summarizing text and generating structured outputs. Your task is to:
-	  1. Summarize the provided text using context retrieved from external sources (RAG context).
-	  2. Output the summary strictly in JSON format.
-	  3. Answer in Bulgarian language.
-	  4. The JSON should include:
-	  - "keywords": A list of 5 key terms that capture the essence of the text.
-	  - "questions": A list of 3 questions that should be addressed based on the text.
-	  - "categories": A classification of the text into 3 categories.
-	  - "summary": A short summary of the provided text
-
-	  Ensure your response is valid JSON with no additional text outside the JSON object.
-
-	  <|eot_id|><|start_header_id|>user<|end_header_id|>
-	  Here is the input text: "${query}"
-
-    RAG Context: "${results.map(r => r.pageContent).join("\n")}"
-
-    Expected Output Format:
-    {
-	"keywords": ["ключова дума 1", "ключова дума 2", "ключова дума 3", "ключова дума 4", "ключова дума 5"],
-	"questions": ["Въпрос 1", "Въпрос 2", "Въпрос 3"],
-	"categories": ["Категория 1", "Категория 2", "Категория 3"],
-	"summary": "резюме на текста"
-    }
-	<|eot_id|><|start_header_id|>assistant<|end_header_id|>`;
-    console.log(prompt);
-  return llm.invoke(prompt);
-};
-
 exports.getRAGQueryResponse = async (req, res) => {
   try {
     const query = req.body.RAGQuery;
-    const qres = await handleRAGQuery(query);
-    res.json({ result: qres });
+    const uid = req.userId;
+
+    const db_result = await db.query(`
+      INSERT INTO documents 
+      (user_id,question) 
+      VALUES (${uid},${query})
+      RETURNING id`);
+    
+    if (db_result.rows.length > 0) {
+        qid = db_result.rows[0].id;
+        await queriesQueue.add('ingest', {
+          query, user_id, "query_id": qid
+        });
+      }
+
+    res.json({ result: "Query Job Started" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -71,7 +71,8 @@ class DashboardController {
         //this.clearResult();
 
         try {
-            const response = await fetch(`${this.token}/api/process-txt`, {method: 'POST', body: formData});
+            const response = await fetch(`${this.token}/api/process-txt`, {method: 'POST', body: formData}).
+            catch((error)=>{console.log(error)});
             const data = await response.json();
 
             if (!response.ok) {

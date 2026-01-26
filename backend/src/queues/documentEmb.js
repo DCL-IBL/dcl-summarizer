@@ -8,9 +8,9 @@ const documentQueue = new Queue('documents', { connection });
 module.exports = { documentQueue };
 
 const worker = new Worker('documents', async job => {
-    const { chroma_id, mime, storedFilename } = job.data;
+    const { chroma_id, mime, storedFilename, user_id } = job.data;
     if (mime === 'text/plain') {
-        await embeddingsTextDocument([storedFilename],[chroma_id]);
+        await embeddingsTextDocument(storedFilename,chroma_id,user_id);
     }
 }, {
     concurrency: 3,
