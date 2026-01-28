@@ -1,0 +1,42 @@
+<table id="query_table">
+    <thead>
+        <tr>
+            <th>Question</th>
+            <th>Answer</th>
+            <th>Status</th>
+            <th>Actions</th>
+            <th>Created</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% userQueries.forEach(q => {%>
+            <tr data-q-id="<%= q.id %>">
+                <td><%= q.question %></td>
+                <td><%= q.answer %></td>
+                <td><%= q.status %></td>
+                <td>
+                    <button data-action="view">👁️</button>
+                    <button data-action="delete">🗑️</button>
+                </td>
+                <td><%= q.created_at.toISOString() %></td>
+            </tr>    
+        <%})%>
+    </tbody>
+    <script>
+        token = localStorage.getItem('accessToken');
+
+        query_table_dom = document.getElementById("query_table");
+        query_table_dom.addEventListener('click', async (e) => {
+            if (e.target.matches('[data-action="delete"]')) {
+                qId = e.target.closest('tr').dataset.qId;
+                const response = await fetch(`${token}/api/queries/delete/${qId}`, {method: 'POST'});
+                
+                if (!response.ok) {
+                    throw new Error('Delete query failed');
+                }
+
+                window.location.reload();
+            }
+        });
+    </script>
+</table>

@@ -51,6 +51,19 @@ class DashboardController {
             e.preventDefault();
             this.run_query();
         });
+
+        this.es = new EventSource(`${this.token}/events`);
+
+        this.es.addEventListener('message', (event) => {
+            const payload = JSON.parse(event.data);
+            if (payload.type === "document") {
+            window.location.reload();
+            } else if (payload.type == "query") {
+                this.aug_loading.classList.replace("block-visible","block-hidden");
+                this.aug_result.classList.replace("block-hidden","block-visible");
+                this.aug_responseText.textContent = payload.result;
+            }
+        });
     }
 
     getFiles() {
@@ -107,11 +120,6 @@ class DashboardController {
             body: JSON.stringify({ "RAGQuery": query })
         })
         .then(response => response.json())
-        .then(data => {
-            this.aug_loading.classList.replace("block-visible","block-hidden");
-            this.aug_result.classList.replace("block-hidden","block-visible");
-            responseText.textContent = data.result;
-        })
         .catch(error => {
             this.aug_loading.classList.replace("block-visible","block-hidden");
             alert('Error processing query: ' + error.message);

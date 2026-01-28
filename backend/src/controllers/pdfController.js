@@ -2,11 +2,10 @@ const pdfParse = require('pdf-parse');
 const fs = require('fs');
 const ollamaService = require('../services/ollamaService');
 const documentProcessor = require('../services/documentProcessor');
-const { Chroma } = require("@langchain/community/vectorstores/chroma");
-const { Ollama } = require("@langchain/community/llms/ollama");
-const { OllamaEmbeddings } = require("@langchain/community/embeddings/ollama");
-const { STATUS_CODES } = require('http');
 const db = require('../db');
+const { Chroma } = require("@langchain/community/vectorstores/chroma");
+const { Ollama } = require("@langchain/ollama");
+const { OllamaEmbeddings } = require("@langchain/ollama");
 const { documentQueue } = require('../queues/documentEmb');
 const { queriesQueue } = require('../queues/queryQueue');
 
@@ -15,6 +14,18 @@ const OLLAMA_URL = 'http://host.docker.internal:11434';
 const MODEL_EMB = process.env.MODEL_EMB;
 const CHROMA_URL = process.env.CHROMA_URL;
 const MODEL_LLM = process.env.MODEL_LLM;
+
+exports.deleteQuery = async (req,res) => {
+  try {
+    const deleteResult = await db.query(`
+          DELETE FROM queries 
+          WHERE id = $1
+        `, [req.params.qId]);
+    res.status(200).json({});
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
 
 exports.deleteDoc = async (req,res) => {
   try {
@@ -25,6 +36,18 @@ exports.deleteDoc = async (req,res) => {
         `, [req.params.docId]);
 
     const rmResult = await fs.promises.rm(`uploads/${docsResult.rows[0].filename}`);
+
+    const embeddings = new OllamaEmbeddings({ baseUrl: OLLAMA_URL, model: MODEL_EMB });
+        
+    const vectorStore = new Chroma(
+      embeddings,
+      { 
+        collectionName: "text_docs",
+        url: CHROMA_URL 
+      }
+    );
+
+    await vectorStore.delete({filter: {"id":docsResult.rows[0].chroma_id}});
 
     const deleteResult = await db.query(`
           DELETE FROM documents 
@@ -87,17 +110,17 @@ exports.getRAGQueryResponse = async (req, res) => {
     const uid = req.userId;
 
     const db_result = await db.query(`
-      INSERT INTO documents 
+      INSERT INTO queries 
       (user_id,question) 
-      VALUES (${uid},${query})
+      VALUES (${uid},'${query}')
       RETURNING id`);
     
     if (db_result.rows.length > 0) {
-        qid = db_result.rows[0].id;
-        await queriesQueue.add('ingest', {
-          query, user_id, "query_id": qid
-        });
-      }
+      qid = db_result.rows[0].id;
+      await queriesQueue.add('ingest', {
+        query, uid, "query_id": qid
+      });
+    }
 
     res.json({ result: "Query Job Started" });
   } catch (error) {

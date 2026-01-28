@@ -1,15 +1,17 @@
-const { TextLoader } = require("langchain/document_loaders/fs/text");
-const { RecursiveCharacterTextSplitter } = require("langchain/text_splitter");
+const { TextLoader } = require("@langchain/classic/document_loaders/fs/text");
+const { RecursiveCharacterTextSplitter } = require("@langchain/textsplitters");
 const { Chroma } = require("@langchain/community/vectorstores/chroma");
-const { OllamaEmbeddings } = require("@langchain/community/embeddings/ollama");
+const { Ollama } = require("@langchain/ollama");
+const { OllamaEmbeddings } = require("@langchain/ollama");
 const { ChromaClient } = require("chromadb");
-const { Document } = require("@langchain/core/documents");
 const db = require('../db');
+const { statusEmitter } = require('../app_events');
 
 //const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
 const OLLAMA_URL = 'http://host.docker.internal:11434';
 const MODEL_EMB = process.env.MODEL_EMB
 const CHROMA_URL = process.env.CHROMA_URL
+const MODEL_LLM = process.env.MODEL_LLM
 
 exports.embeddingsTextDocument = async function(file,cid,user_id) {
   try {
@@ -32,20 +34,23 @@ exports.embeddingsTextDocument = async function(file,cid,user_id) {
     const loader = new TextLoader(`uploads/${file}`);
     var doc1 = await loader.load();
     doc1[0].metadata.uid = user_id;
-    doc1[0].id = cid;
-    
-    const ids = await vectorStore.addDocuments(doc1,{ "ids":[cid] });
+    doc1[0].metadata.id = cid;
+    const splitDocs = await splitter.splitDocuments(doc1);
+
+    const ids = await vectorStore.addDocuments(splitDocs);
     console.log(`Added document to text_docs with id ${cid} to user id ${user_id}`);
 
     const updateResult = await db.query(`
             UPDATE documents
-            SET status = 'ready', chunk_count = 0, updated_at = now() WHERE chroma_id = '${cid}'
+            SET status = 'ready', chunk_count = ${splitDocs.length}, updated_at = now() WHERE chroma_id = '${cid}'
             `);
-  
-    // Split and store documents
-    // const splitDocs = await splitter.splitDocuments(document1);
     
-    //await vectorStore.addDocuments(splitDocs);
+    statusEmitter.emit('status-update', {
+      type: 'document',
+      status: 'ready',
+      user_id
+    });
+
   } catch (err) {
     console.log(err.message);
     throw err;
@@ -66,7 +71,7 @@ exports.handleRAGQuery = async (query,user_id,query_id) => {
       { collectionName: "text_docs", url: CHROMA_URL }
     );
 
-    const results = await vectorStore.similaritySearch(query, 3, { uid: user_id });
+    const results = await vectorStore.similaritySearch(query, 3, {"uid":user_id});
     //console.log(results);
   
     const llm = new Ollama({ baseUrl: OLLAMA_URL, model: MODEL_LLM });
@@ -97,14 +102,21 @@ exports.handleRAGQuery = async (query,user_id,query_id) => {
     }
 	<|eot_id|><|start_header_id|>assistant<|end_header_id|>`;
     //console.log(prompt);
-    await llm.invoke(prompt);
+    const result = await llm.invoke(prompt);
 
     console.log(`LLM invoke for user id ${user_id} and query id ${qid}`);
 
     const updateResult = await db.query(`
             UPDATE queries
-            SET status = 'ready', updated_at = now() WHERE id = '${query_id}'
+            SET status = 'completed', updated_at = now(), answer = '${result}' WHERE id = '${query_id}'
             `);
+    
+    statusEmitter.emit('status-update', {
+      type: 'query',
+      status: 'ready',
+      result,
+      user_id
+    });
   } catch (err) {
     console.log(err.message);
     throw err;

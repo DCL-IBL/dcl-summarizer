@@ -11,5 +11,6 @@ router.post('/process-rag', pdfController.getRAGQueryResponse);
 router.post('/clear-db', pdfController.clearDB);
 
 router.post('/documents/delete/:docId', pdfController.deleteDoc);
+router.post('/queries/delete/:qId',pdfController.deleteQuery);
 
 module.exports = router;

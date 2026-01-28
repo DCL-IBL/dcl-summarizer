@@ -9,8 +9,8 @@ const { handleRAGQuery } = require('../services/documentProcessor');
 module.exports = { queriesQueue };
 
 const worker = new Worker('queries', async job => {
-    const { query, user_id, query_id } = job.data;
-    await handleRAGQuery(query,user_id,query_id);
+    const { query, uid, query_id } = job.data;
+    await handleRAGQuery(query,uid,query_id);
 }, {
     concurrency: 3,
     connection

@@ -4,7 +4,9 @@ const cors = require('cors');
 const apiRoutes = require('./routes/apiRoutes');
 const authRoutes = require('./routes/authRoutes');
 const expressLayouts = require('express-ejs-layouts');
-const document_model = require('./models/document_model.js');
+const document_model = require('./models/document_model');
+const query_model = require('./models/query_model')
+const { statusEmitter } = require('./app_events');
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -29,15 +31,15 @@ app.use(expressLayouts);
 app.set('layout','layouts/main.ejs');
 
 app.get('/dashboard/:token', authRoutes.authJwtAsParam, async (req, res, next) => {
-  const pastQueries = {};//await ragRepo.getUserQueries(req.session.userId, { limit: 20 });
-  const profile = {};//await profileRepo.getUserProfile(req.session.userId);
+  const profile = {};
   const userDocs = await document_model.getUserDocs(req.userId);
+  const userQueries = await query_model.getUserQueries(req.userId);
   //console.log(userDocs);
 
   res.render('pages/dashboard',{
     title:"DCL Summarizer Dashboard",
     userDocs,
-    //pastQueries,
+    userQueries
     //profile
   });
   next();
@@ -45,6 +47,39 @@ app.get('/dashboard/:token', authRoutes.authJwtAsParam, async (req, res, next) =
 
 app.use('/dashboard/:token/api', authRoutes.authJwtAsParam, apiRoutes);
 app.use('/auth',authRoutes.router);
+
+app.get('/dashboard/:token/events', authRoutes.authJwtAsParam, (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.flushHeaders();
+
+  // Send initial heartbeat
+  res.write('event: heartbeat \n data: {}\n\n');
+
+  const handleUpdate = (payload) => {
+    if (payload.user_id === req.userId) {
+      const json = JSON.stringify(payload);
+      res.write(`data: ${json}\n\n`);
+    }
+  }
+
+  statusEmitter.on('status-update', handleUpdate);
+
+  // Cleanup on disconnect
+  req.on('close', () => {
+    statusEmitter.off('status-update', handleUpdate);
+    res.end();
+  });
+
+  // Heartbeat every 30s to keep connection alive
+  const heartbeat = setInterval(() => {
+    if (!res.writableEnded) {
+      res.write(': heartbeat\n\n');
+    }
+  }, 30000);
+});
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
