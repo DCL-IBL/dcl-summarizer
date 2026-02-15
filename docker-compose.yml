@@ -4,7 +4,7 @@ services:
   chromadb:
     image: chromadb/chroma
     ports:
-      - "8001:8000"
+      - "8002:8000"
     environment:
       - ALLOW_RESET=true
       - OPENBLAS_NUM_THREADS=1
@@ -18,23 +18,27 @@ services:
         max-size: "10m"
 
 # uncomment ollama service for local instance
-#  ollama:
-#    image: ollama/ollama:latest
-#    ports:
-#      - "11434:11434"
-#    volumes:
-#      - ollama_data:/root/.ollama
-#    runtime: nvidia
-#    logging:
-#      options:
-#        max-size: "10m"
+  ollama:
+    #image: ollama/ollama:latest
+    image: ollama/ollama:rocm
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    #runtime: nvidia
+    devices: #amd
+      - /dev/kfd
+      - /dev/dri
+    logging:
+      options:
+        max-size: "10m"
 
   backend:
     build: ./backend
     ports:
-      - "1316:8000"
+      - "8003:8000"
     depends_on:
-#      - ollama
+      - ollama
       - postgres
       - redis
     volumes:
@@ -56,7 +60,7 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "3000:443"
+      - "1318:443"
     depends_on:
       - backend
     volumes:
@@ -82,6 +86,6 @@ services:
     image: redis:7
 
 volumes:
-#  ollama_data:
+  ollama_data:
   chroma_data:
   postgres_data:

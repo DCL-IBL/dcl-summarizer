@@ -1,6 +1,8 @@
-.page-section {
-    background-color: skyblue;
-}
+@import "base.css";
+@import "layout.css";
+@import "utilities.css";
+
+@import "components/table.css";
 
 .block-visible {
     display: block;

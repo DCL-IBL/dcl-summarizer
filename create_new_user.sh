@@ -1,0 +1,1 @@
+curl -X POST http://localhost:8003/auth/signup -d '{"email":"a@a.a","password":"aaa"}' -v -H "Content-Type: application/json"

@@ -7,8 +7,8 @@ const { ChromaClient } = require("chromadb");
 const db = require('../db');
 const { statusEmitter } = require('../app_events');
 
-//const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
-const OLLAMA_URL = 'http://host.docker.internal:11434';
+const OLLAMA_URL = process.env.OLLAMA_URL; //|| 'http://localhost:11434';
+//const OLLAMA_URL = 'http://host.docker.internal:11434';
 const MODEL_EMB = process.env.MODEL_EMB
 const CHROMA_URL = process.env.CHROMA_URL
 const MODEL_LLM = process.env.MODEL_LLM
@@ -52,7 +52,7 @@ exports.embeddingsTextDocument = async function(file,cid,user_id) {
     });
 
   } catch (err) {
-    console.log(err.message);
+    console.log(`Error in embeddingsTextDocument ${err.message}`);
     throw err;
   }
 }

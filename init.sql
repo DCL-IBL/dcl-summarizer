@@ -21,7 +21,7 @@ CREATE TABLE documents (
   id             BIGSERIAL PRIMARY KEY,
   chroma_id      UUID DEFAULT gen_random_uuid(),
   user_id        INTEGER REFERENCES users(id) ON DELETE CASCADE,  -- NULL = public
-  title          TEXT NOT NULL UNIQUE ON CONFLICT DO NOTHING,
+  title          TEXT NOT NULL UNIQUE,
   filename       TEXT,
   collection     TEXT,          -- ChromaDB collection name
   mime_type      TEXT,                   

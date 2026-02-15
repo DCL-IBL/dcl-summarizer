@@ -99,7 +99,7 @@ exports.processTxt = async (req, res) => {
 
     res.json({result: "Uploaded"});
   } catch (error) {
-    console.log(error.message);
+    console.log(`Error in processTxt ${error.message}`);
     res.status(500).json({ error: error.message });
   }
 };

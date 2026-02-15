@@ -1,0 +1,17 @@
+.login-container { 
+  background: white; 
+  padding: 2.5rem; 
+  border-radius: 16px; 
+  box-shadow: 0 20px 25px -5px hsla(0, 0%, 0%, 0.1);
+  width: 100%; max-width: 400px; 
+}
+
+.login-form h1 { 
+  text-align: center; 
+  margin-bottom: 2rem; 
+  color: hsl(215, 28%, 17%); 
+}
+
+.form-group { 
+  margin-bottom: 1.5rem; 
+}
